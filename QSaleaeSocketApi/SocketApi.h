@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QString>
 #include <QTcpSocket>
-#include <QTextStream>
 
 namespace SaleaeSocketApi
 {
@@ -13,13 +12,9 @@ class SaleaeClient : public QObject
 
 public:
     SaleaeClient(QString host_str = "127.0.0.1", int port_input = 10429 , QObject *parent = NULL);
-
-    const bool PrintCommandsToConsole = false;
-
-    QTcpSocket Socket;
-    QTextStream Stream;
-    int port;
-    QString host;
+    // connect and disconnect function names are reserved
+    bool connectToLogic(QString host_str = "127.0.0.1", int port_input = 10429);
+    void disconnectFromLogic();
 
     //Command strings
     const QString set_trigger_cmd = "SET_TRIGGER";
@@ -387,40 +382,11 @@ private:
     void GetResponse( QString &  response );
     bool TryParseDeviceType( QString input, DeviceType & device_type );
 
+    const bool PrintCommandsToConsole = false;
+
+    QTcpSocket *Socket;
+    int port;
+    QString host;
 };
-
-
-
-class QStringHelper
-{
-
-public:
-
-    QString Readstring(  QTextStream & stream )
-    {
-        int max_length = 128;
-        QString str = "";
-        while( true )
-        {
-            str.append(stream.read( max_length ));
-            if (str.length() > max_length)
-                break;
-        }
-        return str;
-    }
-
-    void WriteLine( QString str )
-    {
-        /*if( SaleaeClient::PrintCommandsToConsole )
-            Console.WriteLine( str );*/
-    }
-
-    void Write( QString str )
-    {
-        /*if( SaleaeClient::PrintCommandsToConsole )
-            Console.Write( str );*/ // FIXME use QloggingCategory
-    }
-};
-
 
 }

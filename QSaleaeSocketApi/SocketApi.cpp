@@ -12,29 +12,50 @@ SaleaeClient::SaleaeClient( QString host_str, int port_input, QObject *parent) :
     port(port_input),
     host(host_str)
 {
-    //Socket = new QTcpSocket( host, port ); // FIXME
-    //Stream = Socket.GetStream();
+    Socket = new QTcpSocket(this);
 }
 
-void SaleaeClient::Writestring(const QString & str )
+bool SaleaeClient::connectToLogic(QString host_str, int port_input)
 {
-    Stream << str << "\0";
+    port = port_input;
+    host = host_str;
 
-    //QStringHelper::WriteLine( "Wrote data: " + str );
+    disconnectFromLogic();
+    Socket->setReadBufferSize(1);
+    Socket->connectToHost(host_str, port_input);
+    if (Socket->waitForConnected(1000)) {
+        qWarning() << "Connected!";
+        return true;
+    } else {
+        qWarning() << "Unable to connect!";
+        return false;
+    }
+}
+
+void SaleaeClient::disconnectFromLogic()
+{
+    if (Socket->state() == QTcpSocket::ConnectedState) {
+        Socket->disconnectFromHost();
+    }
+}
+
+void SaleaeClient::Writestring(const QString &str )
+{
+    Socket->write(str.toLocal8Bit());
+    Socket->putChar('\0');
+    Socket->flush();
+    qWarning() << "Wrote data: " << str;
 }
 
 void SaleaeClient::GetResponse( QString &  response )
 {
-    while( response.isEmpty()  )
-    {
-        response.append(Stream.readAll());
+    Socket->waitForReadyRead(0)
+        response.append(Socket->readAll());
     }
-    //QStringHelper.WriteLine( "Response: " + response ); // FIXME
+    qWarning() << "Response data: " << response;
 
     if( !( response.mid( response.lastIndexOf('A') ) == "ACK" ) ) {
-        //note: this does not properly handle NAK replies.
-        //throw new SaleaeSocketApiException();
-        // FIXME
+        throw new SaleaeSocketApiException();
     }
 }
 
@@ -68,7 +89,7 @@ QString SaleaeClient::CustomCommand( QString export_command )
     QString response = "";
     while( response.isEmpty() )
     {
-        response += Stream.readAll();
+        response.append(Socket->readAll());
     }
 
     return response;
@@ -612,8 +633,7 @@ void SaleaeClient::ExportAnalyzers( int selected, QString filename, bool mXmitFi
 /// </summary>
 void SaleaeClient::Capture()
 {
-    QString export_command = capture_cmd;
-    Writestring( export_command );
+    Writestring( capture_cmd );
 
     QString response = "";
     GetResponse(response);
