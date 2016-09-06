@@ -935,7 +935,7 @@ namespace Saleae.SocketApi
 
 		private bool TryParseDeviceType( string input, out DeviceType device_type )
 		{
-			device_type = DeviceType.Logic; // defualt.
+			device_type = DeviceType.Logic; // default.
 
 			var all_options = Enum.GetValues( typeof( DeviceType ) ).Cast<DeviceType>();
 
