@@ -8,6 +8,13 @@ QT       += network
 
 QT       -= gui
 
+OBJECTS_DIR = build
+MOC_DIR = build
+UI_DIR = build
+RCC_DIR=build
+
+DESTDIR = bin
+
 TARGET = SaleaeSocketApi
 TEMPLATE = lib
 
