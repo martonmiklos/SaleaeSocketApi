@@ -1,4 +1,7 @@
-﻿#include "SocketApiTypes.h"
+﻿#ifndef SOCKETAPI_H
+#define SOCKETAPI_H
+
+#include "SocketApiTypes.h"
 
 #include <QList>
 #include <QObject>
@@ -65,24 +68,23 @@ public:
     };
 
     enum Trigger {
-
         None,
-
         High,
-
         Low,
-
         FallingEdge,
-
         RisingEdge,
-
         NegativePulse,
-
         PositivePulse
     };
     Q_ENUM(Trigger)
 
-    enum PerformanceOption { OneHundredPercent = 100, EightyPercent = 80, SixtyPercent = 60, FortyPercent = 40, TwentyPercent = 20 };
+    enum PerformanceOption {
+        OneHundredPercent = 100,
+        EightyPercent = 80,
+        SixtyPercent = 60,
+        FortyPercent = 40,
+        TwentyPercent = 20
+    };
 
     //Export Data
     enum DataExportChannelSelection
@@ -390,3 +392,5 @@ private:
 };
 
 }
+
+#endif

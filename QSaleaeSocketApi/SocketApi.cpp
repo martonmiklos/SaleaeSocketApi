@@ -49,13 +49,13 @@ void SaleaeClient::Writestring(const QString &str )
 
 void SaleaeClient::GetResponse( QString &  response )
 {
-    Socket->waitForReadyRead(0)
+    /*Socket->waitForReadyRead(0)
         response.append(Socket->readAll());
-    }
+    }*/
     qWarning() << "Response data: " << response;
 
     if( !( response.mid( response.lastIndexOf('A') ) == "ACK" ) ) {
-        throw new SaleaeSocketApiException();
+        //throw new SaleaeSocketApiException(); FIXME
     }
 }
 
