@@ -334,40 +334,40 @@ public:
     };
 
     QString CustomCommand( QString export_command );
-    void SetTrigger( QList<Trigger> triggers, double minimum_pulse_width_s = 0.0, double maximum_pulse_width_s = 1.0 );
-    void SetNumSamples( int num_samples );
-    void SetCaptureSeconds( double seconds );
+    bool SetTrigger( QList<Trigger> triggers, double minimum_pulse_width_s = 0.0, double maximum_pulse_width_s = 1.0 );
+    bool SetNumSamples( int num_samples );
+    bool SetCaptureSeconds( double seconds );
 
-    void SetDigitalVoltageOption( DigitalVoltageOption option );
+    bool SetDigitalVoltageOption( DigitalVoltageOption option );
     QList<DigitalVoltageOption> GetDigitalVoltageOptions();
 
-    void CloseAllTabs();
+    bool CloseAllTabs();
 
     QList<SampleRate> GetAvailableSampleRates();
-    void SetSampleRate( SampleRate sample_rate );
+    bool SetSampleRate( SampleRate sample_rate );
     SampleRate GetSampleRate();
 
-    void CaptureToFile( QString file );
-    void SaveToFile( QString file );
-    void LoadFromFile( QString file );
+    bool CaptureToFile( QString file );
+    bool SaveToFile( QString file );
+    bool LoadFromFile( QString file );
 
-    void ExportData( ExportDataStruct export_data_struct );
+    bool ExportData( ExportDataStruct export_data_struct );
     bool ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels, bool capture_contains_analog_channels );
 
     QList<Analyzer> GetAnalyzers();
-    void ExportAnalyzers( int selected, QString filename, bool mXmitFile );
+    bool ExportAnalyzers( int selected, QString filename, bool mXmitFile );
 
-    void Capture();
-    void StopCapture();
+    bool Capture();
+    bool StopCapture();
 
     int GetCapturePretriggerBufferSize();
-    void SetCapturePretriggerBufferSize( int buffer_size );
+    bool SetCapturePretriggerBufferSize( int buffer_size );
 
     QList<ConnectedDevice> GetConnectedDevices();
 
-    void SelectActiveDevice( int device_number );
+    bool SelectActiveDevice( int device_number );
 
-    void SetPerformanceOption( PerformanceOption performance );
+    bool SetPerformanceOption( PerformanceOption performance );
     PerformanceOption GetPerformanceOption();
 
     bool IsProcessingComplete();
@@ -375,13 +375,15 @@ public:
     bool BlockUntillProcessingCompleteOrTimeout(const quint32 timeout );
 
     void GetActiveChannels( QList<int> digital_channels, QList<int> analog_channels );
-    void SetActiveChannels(QList<int> digital_channels, QList<int> analog_channels );
+    bool SetActiveChannels(QList<int> digital_channels, QList<int> analog_channels );
 
-    void ResetActiveChannels();
+    bool ResetActiveChannels();
 private:
     void Writestring(const QString &str );
 
-    void GetResponse( QString &  response );
+    bool GetResponse(int timeoutInMsec = 1000);
+    QString GetResponseString(int timeoutInMsec = 100);
+
     bool TryParseDeviceType( QString input, DeviceType & device_type );
 
     const bool PrintCommandsToConsole = false;

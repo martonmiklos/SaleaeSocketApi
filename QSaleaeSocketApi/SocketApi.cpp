@@ -4,6 +4,7 @@
 #include <QString>
 #include <QStringList>
 #include <QThread>
+#include <QElapsedTimer>
 
 namespace SaleaeSocketApi
 {
@@ -21,7 +22,7 @@ bool SaleaeClient::connectToLogic(QString host_str, int port_input)
     host = host_str;
 
     disconnectFromLogic();
-    Socket->setReadBufferSize(1);
+    Socket->setReadBufferSize(3);
     Socket->connectToHost(host_str, port_input);
     if (Socket->waitForConnected(1000)) {
         qWarning() << "Connected!";
@@ -47,16 +48,34 @@ void SaleaeClient::Writestring(const QString &str )
     qWarning() << "Wrote data: " << str;
 }
 
-void SaleaeClient::GetResponse( QString &  response )
+bool SaleaeClient::GetResponse(int timeoutInMsec)
 {
-    /*Socket->waitForReadyRead(0)
-        response.append(Socket->readAll());
-    }*/
-    qWarning() << "Response data: " << response;
+    QByteArray response;
+    QElapsedTimer timer;
+    timer.start();
 
-    if( !( response.mid( response.lastIndexOf('A') ) == "ACK" ) ) {
-        //throw new SaleaeSocketApiException(); FIXME
+    while (timer.elapsed() < timeoutInMsec) {
+        Socket->waitForReadyRead(1);
+        if (Socket->bytesAvailable()) {
+            response.append(Socket->readAll());
+            qWarning() << response;
+        }
+
+        if (response.startsWith("ACK")) {
+            return true;
+        } else if (response.startsWith("NAK")) {
+            return false;
+        }
     }
+    return false;
+}
+
+QString SaleaeClient::GetResponseString(int timeoutInMsec)
+{
+    QString response;
+    Socket->waitForReadyRead(timeoutInMsec);
+    response.append(Socket->readAll());
+    return response;
 }
 
 bool SaleaeClient::TryParseDeviceType( QString input, DeviceType  & device_type )
@@ -100,7 +119,7 @@ QString SaleaeClient::CustomCommand( QString export_command )
 /// To ignore the maximum_pulse_width_s parameter, set it to 0.
 /// </summary>
 /// <param name="triggers">List of triggers for active channels. Ex"High, Low, Posedge, Negedge, Low, High, ..."</param>
-void SaleaeClient::SetTrigger( QList<Trigger> triggers, double minimum_pulse_width_s, double maximum_pulse_width_s )
+bool SaleaeClient::SetTrigger( QList<Trigger> triggers, double minimum_pulse_width_s, double maximum_pulse_width_s )
 {
 
     QStringList command;
@@ -124,46 +143,41 @@ void SaleaeClient::SetTrigger( QList<Trigger> triggers, double minimum_pulse_wid
     QString tx_command = command.join(",");
     Writestring( tx_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
 /// Set number of samples for capture
 /// </summary>
 /// <param name="num_samples">Number of samples to set</param>
-void SaleaeClient::SetNumSamples( int num_samples )
+bool SaleaeClient::SetNumSamples( int num_samples )
 {
     QString export_command = set_num_samples_cmd + ", ";
     export_command += QString::number(num_samples);
     Writestring(export_command);
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
 /// Set number of seconds to capture for
 /// </summary>
 /// <param name="capture_seconds">Number of seconds to capture</param>
-void SaleaeClient::SetCaptureSeconds( double seconds )
+bool SaleaeClient::SetCaptureSeconds( double seconds )
 {
     QString export_command = set_capture_seconds_cmd + ", ";
     export_command += QString::number(seconds);
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
-void SaleaeClient::SetDigitalVoltageOption(DigitalVoltageOption option)
+bool SaleaeClient::SetDigitalVoltageOption(DigitalVoltageOption option)
 {
     QString command = set_digital_voltage_option_cmd;
     command += ", " + QString::number(option.Index);
     Writestring( command );
-
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
@@ -175,17 +189,7 @@ QList<SaleaeClient::DigitalVoltageOption> SaleaeClient::GetDigitalVoltageOptions
     QString command = get_digital_voltage_options_cmd;
     Writestring( command );
 
-    QString response = "";
-    /*try
-    {*/
-    GetResponse(response);
-    //} // FIXME
-    /*catch( SaleaeSocketApiException ex )
-    {
-        //NAKed. No voltage options.
-        return NULL;
-    }*/
-
+    QString response = GetResponseString();
     //var elems = response.split(',', '\n' ).Select( x => x.Trim() ).ToList();
     QStringList elems;
     foreach (QString row, response.split('\n')) {
@@ -213,20 +217,19 @@ QList<SaleaeClient::DigitalVoltageOption> SaleaeClient::GetDigitalVoltageOptions
 /// <summary>
 /// Closes all currently open tabs.
 /// </summary>
-void SaleaeClient::CloseAllTabs()
+bool SaleaeClient::CloseAllTabs()
 {
     QString export_command = close_all_tabs_cmd;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
 /// Set the sample rate for capture
 /// </summary>
 /// <param name="sample_rate">Sample rate to set</param>
-void SaleaeClient::SetSampleRate( SampleRate sample_rate )
+bool SaleaeClient::SetSampleRate( SampleRate sample_rate )
 {
     QString export_command = set_sample_rate_cmd + ", ";
     export_command += QString::number(sample_rate.DigitalSampleRate);
@@ -234,8 +237,7 @@ void SaleaeClient::SetSampleRate( SampleRate sample_rate )
 
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
@@ -247,8 +249,7 @@ SampleRate SaleaeClient::GetSampleRate()
     QString command = get_sample_rate_cmd;
     Writestring( command );
 
-    QString response = "";
-    GetResponse(response);
+    QString response = GetResponseString();
 
     //var elems = response.split( '\n' ).Take(2).Select( x => int.Parse( x.Trim() ) ).ToList();
     QList<int> elems;
@@ -267,46 +268,43 @@ SampleRate SaleaeClient::GetSampleRate()
 /// Start capture and save when capture finishes
 /// </summary>
 /// <param name="file">File to save capture to</param>
-void SaleaeClient::CaptureToFile( QString file )
+bool SaleaeClient::CaptureToFile( QString file )
 {
     QString export_command = capture_to_file_cmd + ", ";
     export_command += file;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
 /// Save active tab capture to file
 /// </summary>
 /// <param name="file">File to save capture to</param>
-void SaleaeClient::SaveToFile( QString file )
+bool SaleaeClient::SaveToFile( QString file )
 {
     QString export_command = save_to_file_cmd + ", ";
     export_command += file;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
 /// Load a saved capture from fil
 /// </summary>
 /// <param name="file">File to load</param>
-void SaleaeClient::LoadFromFile( QString file )
+bool SaleaeClient::LoadFromFile( QString file )
 {
     QString export_command = load_from_file_cmd + ", ";
     export_command += file;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 //create input struct
-void SaleaeClient::ExportData( ExportDataStruct export_data_struct )
+bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
 {
     //channels
     const QString all_channels_option = ", ALL_CHANNELS";
@@ -444,8 +442,7 @@ void SaleaeClient::ExportData( ExportDataStruct export_data_struct )
 
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
@@ -565,10 +562,8 @@ bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, 
     QString socket_command = command_parts.join(", ");
     Writestring( socket_command );
 
-    QString response = "";
-    GetResponse(response);
 
-    return true;
+    return GetResponse();
 }
 
 /// <summary>
@@ -580,8 +575,7 @@ QList<Analyzer> SaleaeClient::GetAnalyzers()
     QString export_command = get_analyzers_cmd;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    QString response = GetResponseString();
 
     //QStringList lines = response.split( '\n' ).Select( x => x.Trim() ).Where( x => !QString.IsNullOrWhiteSpace( x ) && !x.Contains( "ACK" ) ).ToList();
     QStringList lines;
@@ -612,7 +606,7 @@ QList<Analyzer> SaleaeClient::GetAnalyzers()
 /// <param name="selected">index of the selected analyzer(GetAnalyzer return QString index + 1)</param>
 /// <param name="filename">file to save analyzer to</param>
 /// <param name="mXmitFile">mXmitFile</param>
-void SaleaeClient::ExportAnalyzers( int selected, QString filename, bool mXmitFile )
+bool SaleaeClient::ExportAnalyzers( int selected, QString filename, bool mXmitFile )
 {
     QString export_command = export_analyzer_cmd + ", ";
     export_command += QString::number(selected) + ", " + filename;
@@ -620,36 +614,28 @@ void SaleaeClient::ExportAnalyzers( int selected, QString filename, bool mXmitFi
         export_command += ", mXmitFile";
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
-    if( mXmitFile == true ) {
-        //Console.WriteLine( response );
-        qWarning() << response;
-    }
+    return GetResponse();
 }
 
 /// <summary>
 /// Start device capture
 /// </summary>
-void SaleaeClient::Capture()
+bool SaleaeClient::Capture()
 {
     Writestring( capture_cmd );
-
-    QString response = "";
-    GetResponse(response);
+    return GetResponse(100);
 }
 
 /// <summary>
 /// Stop the current capture
 /// </summary>
 
-void SaleaeClient::StopCapture()
+bool SaleaeClient::StopCapture()
 {
     QString export_command = stop_capture_cmd;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 
@@ -662,8 +648,7 @@ int SaleaeClient::GetCapturePretriggerBufferSize()
     QString export_command = get_capture_pretrigger_buffer_size_cmd;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    QString response = GetResponseString();
     QStringList input_string = response.split( '\n' );
     int buffer_size = input_string.at(0).toInt();
     return buffer_size;
@@ -673,14 +658,13 @@ int SaleaeClient::GetCapturePretriggerBufferSize()
 /// set pre-trigger buffer size
 /// </summary>
 /// <param name="buffer_size">buffer size in # of samples</param>
-void SaleaeClient::SetCapturePretriggerBufferSize( int buffer_size )
+bool SaleaeClient::SetCapturePretriggerBufferSize( int buffer_size )
 {
     QString export_command = set_capture_pretrigger_buffer_size_cmd + ", ";
     export_command += QString::number(buffer_size);
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
@@ -692,8 +676,7 @@ QList<SaleaeClient::ConnectedDevice> SaleaeClient::GetConnectedDevices()
     QString command = get_connected_devices_cmd;
     Writestring( command );
 
-    QString response = "";
-    GetResponse(response);
+    QString response = GetResponseString();
     //var response_strings = response.split( '\n' ).ToList();
     QStringList response_strings = response.split('\n');
     for (int i = 0; i<response_strings.count(); i++) {
@@ -729,27 +712,25 @@ QList<SaleaeClient::ConnectedDevice> SaleaeClient::GetConnectedDevices()
 /// Select the active capture device
 /// </summary>
 /// <param name="device_number">Index of device (as returned from ConnectedDevices struct)</param>
-void SaleaeClient::SelectActiveDevice( int device_number )
+bool SaleaeClient::SelectActiveDevice( int device_number )
 {
     QString export_command = select_active_device_cmd + ", ";
     export_command += QString::number(device_number);
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
 /// Set the performance option
 /// </summary>
-void SaleaeClient::SetPerformanceOption( PerformanceOption performance )
+bool SaleaeClient::SetPerformanceOption( PerformanceOption performance )
 {
     QString export_command = set_performance_cmd + ", ";
     export_command += QString::number(performance);
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
@@ -761,8 +742,7 @@ SaleaeClient::PerformanceOption SaleaeClient::GetPerformanceOption()
     QString export_command = get_performance_cmd;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    QString response = GetResponseString();
 
     PerformanceOption selected_option = ( PerformanceOption )response.split( '\n' ).first().toInt();
     return selected_option;
@@ -779,8 +759,7 @@ bool SaleaeClient::IsProcessingComplete()
     QString export_command = is_processing_complete_cmd;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    QString response = GetResponseString();
 
     bool complete_processing = response.split( '\n' ).first().toInt();
     return complete_processing;
@@ -797,8 +776,7 @@ bool SaleaeClient::IsAnalyzerProcessingComplete( int index )
     export_command += ", " + QString::number( index );
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    QString response = GetResponseString();
 
     bool complete_processing = response.split( '\n' ).first().toInt();
     return complete_processing;
@@ -835,8 +813,7 @@ bool SaleaeClient::BlockUntillProcessingCompleteOrTimeout(const quint32 timeoutI
 QList<SampleRate> SaleaeClient::GetAvailableSampleRates()
 {
     Writestring( get_all_sample_rates_cmd );
-    QString response = "";
-    GetResponse(response);
+    QString response = GetResponseString();
 
     QList<SampleRate> sample_rates;
     QStringList responses = response.split("\n", QString::SkipEmptyParts);
@@ -865,8 +842,7 @@ void SaleaeClient::GetActiveChannels( QList<int> digital_channels, QList<int> an
     QString export_command = get_active_channels_cmd;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    QString response = GetResponseString();
 
     digital_channels.clear();
     analog_channels.clear();
@@ -900,7 +876,7 @@ void SaleaeClient::GetActiveChannels( QList<int> digital_channels, QList<int> an
 /// Set the active channels for devices Logic16, Logic 8(second gen), Logic 8 pro, Logic 16 pro
 /// </summary>
 /// <param name="channels">array of channels to be active: 0-15</param>
-void SaleaeClient::SetActiveChannels( QList <int> digital_channels, QList<int >analog_channels)
+bool SaleaeClient::SetActiveChannels( QList <int> digital_channels, QList<int >analog_channels)
 {
 
     QString export_command = set_active_channels_cmd;
@@ -918,20 +894,18 @@ void SaleaeClient::SetActiveChannels( QList <int> digital_channels, QList<int >a
     }
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 /// <summary>
 /// Reset to default active logic 16 channels (0-15)
 /// </summary>
-void SaleaeClient::ResetActiveChannels()
+bool SaleaeClient::ResetActiveChannels()
 {
     QString export_command = reset_active_channels_cmd;
     Writestring( export_command );
 
-    QString response = "";
-    GetResponse(response);
+    return GetResponse();
 }
 
 } // end namespace SaleaeSocketApi
