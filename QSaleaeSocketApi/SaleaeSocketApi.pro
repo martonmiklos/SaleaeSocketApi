@@ -18,15 +18,7 @@ DESTDIR = bin
 TARGET = SaleaeSocketApi
 TEMPLATE = lib
 
-DEFINES += SALEAESOCKETAPI_LIBRARY
-
-SOURCES += \
-    SocketApi.cpp
-
-HEADERS +=\
-        saleaesocketapi_global.h \
-    SocketApiTypes.h \
-    SocketApi.h
+include(SaleaeSocketApi.pri)
 
 unix {
     target.path = /usr/lib
