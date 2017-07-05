@@ -28,7 +28,7 @@ bool SaleaeClient::connectToLogic(QString host_str, int port_input)
         qWarning() << "Connected!";
         return true;
     } else {
-        qWarning() << "Unable to connect!";
+        qWarning() << "Unable to connect to the Saleae Logic!";
         return false;
     }
 }
