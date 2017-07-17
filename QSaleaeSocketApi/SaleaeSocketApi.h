@@ -1,7 +1,7 @@
 ﻿#ifndef SOCKETAPI_H
 #define SOCKETAPI_H
 
-#include "SocketApiTypes.h"
+#include "SaleaeSocketApiTypes.h"
 
 #include <QList>
 #include <QObject>

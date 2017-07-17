@@ -1,4 +1,4 @@
-﻿#include "SocketApi.h"
+﻿#include "SaleaeSocketApi.h"
 
 #include <QMetaEnum>
 #include <QString>

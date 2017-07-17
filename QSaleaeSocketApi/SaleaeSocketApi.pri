@@ -7,8 +7,8 @@
 
 DEFINES += SALEAESOCKETAPI_LIBRARY
 
-SOURCES += $$PWD/SocketApi.cpp
+SOURCES += $$PWD/SaleaeSocketApi.cpp
 
 HEADERS += $$PWD/saleaesocketapi_global.h \
-           $$PWD/SocketApiTypes.h \
-           $$PWD/SocketApi.h
+           $$PWD/SaleaeSocketApiTypes.h \
+           $$PWD/SaleaeSocketApi.h
