@@ -10,41 +10,44 @@ namespace SaleaeSocketApi
 {
 SaleaeClient::SaleaeClient( QString host_str, int port_input, QObject *parent) :
     QObject(parent),
-    port(port_input),
-    host(host_str)
+    m_port(port_input),
+    m_host(host_str)
 {
-    Socket = new QTcpSocket(this);
+    m_socket = new QTcpSocket(this);
 }
 
 bool SaleaeClient::connectToLogic(QString host_str, int port_input)
 {
-    port = port_input;
-    host = host_str;
+    m_port = port_input;
+    m_host = host_str;
 
     disconnectFromLogic();
-    Socket->setReadBufferSize(3);
-    Socket->connectToHost(host_str, port_input);
-    if (Socket->waitForConnected(1000)) {
+    m_socket->setReadBufferSize(3);
+    m_socket->connectToHost(host_str, port_input);
+    if (m_socket->waitForConnected(1000)) {
         qWarning() << "Connected!";
+        m_logicConnected = true;
         return true;
     } else {
         qWarning() << "Unable to connect!";
+        m_logicConnected = false;
         return false;
     }
 }
 
 void SaleaeClient::disconnectFromLogic()
 {
-    if (Socket->state() == QTcpSocket::ConnectedState) {
-        Socket->disconnectFromHost();
+    if (isLogicConnected()) {
+        m_socket->disconnectFromHost();
+        m_logicConnected = false;
     }
 }
 
 void SaleaeClient::Writestring(const QString &str )
 {
-    Socket->write(str.toLocal8Bit());
-    Socket->putChar('\0');
-    Socket->flush();
+    m_socket->write(str.toLocal8Bit());
+    m_socket->putChar('\0');
+    m_socket->flush();
     qWarning() << "Wrote data: " << str;
 }
 
@@ -55,9 +58,9 @@ bool SaleaeClient::GetResponse(int timeoutInMsec)
     timer.start();
 
     while (timer.elapsed() < timeoutInMsec) {
-        Socket->waitForReadyRead(1);
-        if (Socket->bytesAvailable()) {
-            response.append(Socket->readAll());
+        m_socket->waitForReadyRead(1);
+        if (m_socket->bytesAvailable()) {
+            response.append(m_socket->readAll());
             qWarning() << response;
         }
 
@@ -73,8 +76,8 @@ bool SaleaeClient::GetResponse(int timeoutInMsec)
 QString SaleaeClient::GetResponseString(int timeoutInMsec)
 {
     QString response;
-    Socket->waitForReadyRead(timeoutInMsec);
-    response.append(Socket->readAll());
+    m_socket->waitForReadyRead(timeoutInMsec);
+    response.append(m_socket->readAll());
     return response;
 }
 
@@ -96,6 +99,19 @@ bool SaleaeClient::TryParseDeviceType( QString input, DeviceType  & device_type 
     return false;
 }
 
+bool SaleaeClient::isLogicConnected() const
+{
+    if (m_logicConnected)
+        return (m_socket->state() == QTcpSocket::ConnectedState);
+
+    return false;
+}
+
+void SaleaeClient::setLogicConnected(bool value)
+{
+    m_logicConnected = value;
+}
+
 /// <summary>
 /// Give the Socket API a custom command
 /// </summary>
@@ -108,7 +124,7 @@ QString SaleaeClient::CustomCommand( QString export_command )
     QString response = "";
     while( response.isEmpty() )
     {
-        response.append(Socket->readAll());
+        response.append(m_socket->readAll());
     }
 
     return response;

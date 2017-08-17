@@ -378,6 +378,10 @@ public:
     bool SetActiveChannels(QList<int> digital_channels, QList<int> analog_channels );
 
     bool ResetActiveChannels();
+
+    bool isLogicConnected() const;
+    void setLogicConnected(bool value);
+
 private:
     void Writestring(const QString &str );
 
@@ -386,11 +390,13 @@ private:
 
     bool TryParseDeviceType( QString input, DeviceType & device_type );
 
-    const bool PrintCommandsToConsole = false;
+    const bool m_printCommandsToConsole = false;
 
-    QTcpSocket *Socket;
-    int port;
-    QString host;
+    QTcpSocket *m_socket;
+    int m_port;
+    QString m_host;
+
+    bool m_logicConnected;
 };
 
 }
