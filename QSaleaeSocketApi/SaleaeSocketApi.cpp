@@ -1,4 +1,4 @@
-﻿#include "SocketApi.h"
+﻿#include "SaleaeSocketApi.h"
 
 #include <QMetaEnum>
 #include <QString>
@@ -29,7 +29,7 @@ bool SaleaeClient::connectToLogic(QString host_str, int port_input)
         m_logicConnected = true;
         return true;
     } else {
-        qWarning() << "Unable to connect!";
+        qWarning() << "Unable to connect to the Saleae Logic!";
         m_logicConnected = false;
         return false;
     }
