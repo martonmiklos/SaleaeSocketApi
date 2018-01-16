@@ -70,12 +70,12 @@ public:
 
     enum Trigger {
         None,
-        High,
-        Low,
-        FallingEdge,
-        RisingEdge,
-        NegativePulse,
-        PositivePulse
+        HIGH,
+        LOW,
+        NEGEDGE,
+        POSEDGE,
+        NEGPULSE,
+        POSPULSE
     };
     Q_ENUM(Trigger)
 
@@ -134,15 +134,15 @@ public:
 
     enum CsvOutputMode
     {
-        CsvSingleNumber,
-        CsvOneColumnPerBit
+        COMBINED,
+        SEPARATE
     };
     Q_ENUM(CsvOutputMode)
 
     enum CsvTimestampType
     {
-        CsvTime,
-        CsvSample
+        TIME_STAMP,
+        SAMPLE_NUMBER
     };
     Q_ENUM(CsvTimestampType)
 
@@ -157,8 +157,8 @@ public:
 
     enum CsvDensity
     {
-        CsvTransition,
-        CsvComplete
+        ROW_PER_CHANGE,
+        ROW_PER_SAMPLE
     };
     Q_ENUM(CsvDensity)
 

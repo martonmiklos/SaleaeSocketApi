@@ -148,11 +148,13 @@ bool SaleaeClient::SetTrigger( QList<Trigger> triggers, double minimum_pulse_wid
         */
 
     foreach (Trigger channel, triggers) {
-        command.append(QMetaEnum::fromType<Trigger>().valueToKey(channel));
-        if (channel == Trigger::PositivePulse || channel == Trigger::NegativePulse) {
-            command.append(QString::number(minimum_pulse_width_s));
-            if( maximum_pulse_width_s > 0)
-                command.append(QString::number(maximum_pulse_width_s));
+        if (channel != None) {
+            command.append(QMetaEnum::fromType<Trigger>().valueToKey(channel));
+            if (channel == Trigger::POSPULSE || channel == Trigger::NEGPULSE) {
+                command.append(QString::number(minimum_pulse_width_s));
+                if( maximum_pulse_width_s > 0)
+                    command.append(QString::number(maximum_pulse_width_s));
+            }
         }
     }
 
@@ -413,14 +415,14 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
         else if( export_data_struct.CsvDelimiter == CsvDelimiterType::COMMA )
             export_command += comma_option;
 
-        if( export_data_struct.CsvTimestamp == CsvTimestampType::CsvSample )
+        if( export_data_struct.CsvTimestamp == CsvTimestampType::SAMPLE_NUMBER )
             export_command += sample_number_option;
-        else if( export_data_struct.CsvTimestamp == CsvTimestampType::CsvTime )
+        else if( export_data_struct.CsvTimestamp == CsvTimestampType::TIME_STAMP )
             export_command += time_stamp_option;
 
-        if( export_data_struct.CsvOutput == CsvOutputMode::CsvSingleNumber )
+        if( export_data_struct.CsvOutput == CsvOutputMode::COMBINED )
             export_command += combined_option;
-        else if( export_data_struct.CsvOutput == CsvOutputMode::CsvOneColumnPerBit )
+        else if( export_data_struct.CsvOutput == CsvOutputMode::SEPARATE )
             export_command += separate_option;
 
         if( export_data_struct.CsvDensityMode == CsvDensity::CsvTransition )
@@ -516,7 +518,7 @@ bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_c
         command_parts.append(QMetaEnum::fromType<CsvDelimiterType>().valueToKey(export_settings.CsvDelimiter));
         command_parts.append(QMetaEnum::fromType<CsvTimestampType>().valueToKey(export_settings.CsvTimestamp));
         command_parts.append(QMetaEnum::fromType<CsvOutputMode>().valueToKey(export_settings.CsvOutput));
-        if( export_settings.CsvOutput == CsvOutputMode::CsvSingleNumber )
+        if( export_settings.CsvOutput == CsvOutputMode::COMBINED )
             command_parts.append(QMetaEnum::fromType<CsvBase>().valueToKey(export_settings.CsvDisplayBase));
         command_parts.append(QMetaEnum::fromType<CsvDensity>().valueToKey(export_settings.CsvDensityMode));
     }
@@ -744,7 +746,6 @@ bool SaleaeClient::SetPerformanceOption( PerformanceOption performance )
     QString export_command = set_performance_cmd + ", ";
     export_command += QString::number(performance);
     Writestring( export_command );
-
     return GetResponse();
 }
 
