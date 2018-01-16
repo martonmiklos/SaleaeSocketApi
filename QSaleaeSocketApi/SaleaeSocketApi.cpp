@@ -425,9 +425,9 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
         else if( export_data_struct.CsvOutput == CsvOutputMode::SEPARATE )
             export_command += separate_option;
 
-        if( export_data_struct.CsvDensityMode == CsvDensity::CsvTransition )
+        if( export_data_struct.CsvDensityMode == CsvDensity::ROW_PER_CHANGE )
             export_command += row_per_change_option;
-        else if( export_data_struct.CsvDensityMode == CsvDensity::CsvComplete )
+        else if( export_data_struct.CsvDensityMode == CsvDensity::ROW_PER_SAMPLE )
             export_command += row_per_sample_option;
 
         if( export_data_struct.CsvDisplayBase == CsvBase::DEC )
