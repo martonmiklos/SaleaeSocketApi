@@ -13,7 +13,7 @@ namespace SaleaeSocketApi
 {
 class SaleaeClient : public QObject
 {
-
+    Q_OBJECT
 public:
     SaleaeClient(QString host_str = "127.0.0.1", int port_input = 10429 , QObject *parent = NULL);
     // connect and disconnect function names are reserved
@@ -207,16 +207,15 @@ public:
             ANALOG,
             DIGITAL
         };
-        Q_ENUM(ChannelDataType)
 
         int Index;// { get; set; }
         ChannelDataType DataType;// { get; set; }
 
         QString GetExportstring()
         {
-            return  QString("% %2")
+            return  QString("%1 %2")
                     .arg(QString::number(Index))
-                    .arg(QMetaEnum::fromType<ChannelDataType>().valueToKey(DataType));
+                    .arg(DataType == ANALOG ? "ANALOG" : "DIGITAL");
         }
 
     };
@@ -347,7 +346,7 @@ public:
     bool LoadFromFile( QString file );
 
     bool ExportData( ExportDataStruct export_data_struct );
-    bool ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels, bool capture_contains_analog_channels );
+    bool ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels = true, bool capture_contains_analog_channels = true);
 
     QList<Analyzer> GetAnalyzers();
     bool ExportAnalyzers( int selected, QString filename, bool mXmitFile );

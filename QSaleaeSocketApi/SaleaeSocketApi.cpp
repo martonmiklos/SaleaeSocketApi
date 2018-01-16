@@ -468,7 +468,9 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
 /// <param name="capture_contains_digital_channels"></param>
 /// <param name="capture_contains_analog_channels"></param>
 /// <returns></returns>
-bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels, bool capture_contains_analog_channels )
+///
+/// TODO: make bool arguments enums!!!
+bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels, bool capture_contains_analog_channels )
 {
     bool is_mixed_mode_capture = capture_contains_digital_channels && capture_contains_analog_channels; //different export options happen in this case.
     if( is_mixed_mode_capture && export_settings.ExportChannelSelection == DataExportChannelSelection::ALL_CHANNELS )
@@ -480,18 +482,15 @@ bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, 
     command_parts.append( export_settings.FileName );
 
     command_parts.append( QMetaEnum::fromType<DataExportChannelSelection>().valueToKey(export_settings.ExportChannelSelection) );
+    command_parts.append( QMetaEnum::fromType<DataExportMixedModeExportType>().valueToKey(export_settings.DataExportMixedExportMode) );
 
     if (export_settings.ExportChannelSelection == DataExportChannelSelection::SPECIFIC_CHANNELS) {
-        if( is_mixed_mode_capture )
-            command_parts.append( QMetaEnum::fromType<DataExportChannelSelection>().valueToKey(export_settings.DataExportMixedExportMode) );
-
         foreach (int channel, export_settings.DigitalChannelsToExport) {
             Channel ch;
             ch.Index = channel;
             ch.DataType = Channel::DIGITAL;
             command_parts.append(ch.GetExportstring());
         }
-
 
         foreach (int channel, export_settings.AnalogChannelsToExport) {
             Channel ch;
@@ -508,7 +507,6 @@ bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, 
         command_parts.append( QString::number(export_settings.StartingTime) );
         command_parts.append( QString::number(export_settings.EndingTime) );
     }
-
 
     command_parts.append( QMetaEnum::fromType<DataExportType>().valueToKey(export_settings.ExportType) );
     //digital only CSV
@@ -560,12 +558,12 @@ bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, 
 
     //VCD (always digital only)
     //if( export_settings.ExportType == DataExportType::VCD ) {
-        //no settings
+    //no settings
     //}
 
     //Matlab digital:
     //if( capture_contains_digital_channels && export_settings.ExportType == DataExportType::MATLAB && ( !is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::DIGITAL_ONLY ) ){
-        //no settings
+    //no settings
     //}
 
     //Matlab analog or mixed:
