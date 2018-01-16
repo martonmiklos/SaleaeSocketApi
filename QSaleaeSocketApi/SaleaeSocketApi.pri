@@ -4,6 +4,7 @@
 #
 #-------------------------------------------------
 
+QT       += network
 
 DEFINES += SALEAESOCKETAPI_LIBRARY
 
