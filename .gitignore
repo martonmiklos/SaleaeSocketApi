@@ -1,5 +1,8 @@
 [Bb]in
 [Oo]bj
+[Bb]uild
 *.suo
-*.user
+*.user*
 packages/*
+Makefile*
+.qmake.stash
