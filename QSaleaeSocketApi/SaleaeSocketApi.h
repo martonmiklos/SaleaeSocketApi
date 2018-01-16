@@ -4,6 +4,7 @@
 #include "SaleaeSocketApiTypes.h"
 
 #include <QList>
+#include <QMetaEnum>
 #include <QObject>
 #include <QString>
 #include <QTcpSocket>
@@ -89,45 +90,45 @@ public:
     //Export Data
     enum DataExportChannelSelection
     {
-        AllChannels,
-        SpecificChannels
+        ALL_CHANNELS,
+        SPECIFIC_CHANNELS
     };
     Q_ENUM(DataExportChannelSelection)
 
 
     enum DataExportMixedModeExportType
     {
-        DigitalOnly,
-        AnalogOnly,
-        AnalogAndDigital
+        DIGITAL_ONLY,
+        ANALOG_ONLY,
+        ANALOG_AND_DIGITAL
     };
     Q_ENUM(DataExportMixedModeExportType)
 
     enum DataExportSampleRangeType {
-        RangeAll,
-        RangeTimes
+        ALL_TIME,
+        TIME_SPAN
     };
     Q_ENUM(DataExportSampleRangeType)
 
     enum DataExportType {
-        ExportBinary,
-        ExportCsv,
-        ExportVcd,
-        ExportMatlab
+        BINARY,
+        CSV,
+        VCD,
+        MATLAB
     };
     Q_ENUM(DataExportType)
 
     enum CsvHeadersType
     {
-        CsvIncludesHeaders,
-        CsvNoHeaders
+        HEADERS,
+        NO_HEADERS
     };
     Q_ENUM(CsvHeadersType)
 
     enum CsvDelimiterType
     {
-        CsvComma,
-        CsvTab
+        COMMA,
+        TAB
     };
     Q_ENUM(CsvDelimiterType)
 
@@ -147,10 +148,10 @@ public:
 
     enum CsvBase
     {
-        CsvBinary,
-        CsvDecimal,
-        CsvHexadecimal,
-        CsvAscii
+        BIN,
+        DEC,
+        HEX,
+        ASCII
     };
     Q_ENUM(CsvBase)
 
@@ -163,15 +164,15 @@ public:
 
     enum BinaryOutputMode
     {
-        BinaryEverySample,
-        BinaryEveryChange
+        EACH_SAMPLE,
+        ON_CHANGE
     };
     Q_ENUM(BinaryOutputMode)
 
     enum BinaryBitShifting
     {
-        BinaryOriginalBitPositions,
-        BinaryShiftRight
+        NO_SHIFT,
+        RIGHT_SHIFT
     };
     Q_ENUM(BinaryBitShifting)
 
@@ -185,7 +186,7 @@ public:
 
     enum AnalogOutputFormat
     {
-        Voltage,
+        VOLTAGE,
         ADC
     };
     Q_ENUM(AnalogOutputFormat)
@@ -203,25 +204,19 @@ public:
     {
         enum ChannelDataType
         {
-            AnalogChannel,
-            DigitalChannel
+            ANALOG,
+            DIGITAL
         };
+        Q_ENUM(ChannelDataType)
 
         int Index;// { get; set; }
         ChannelDataType DataType;// { get; set; }
 
         QString GetExportstring()
         {
-            QString ret = QString::number(Index);
-            switch (DataType) {
-            case AnalogChannel:
-                ret.append("AnalogChannel");
-                break;
-            case DigitalChannel:
-                ret.append("DigitalChannel"); // FIXME use MOC
-                break;
-            }
-            return ret;
+            return  QString("% %2")
+                    .arg(QString::number(Index))
+                    .arg(QMetaEnum::fromType<ChannelDataType>().valueToKey(DataType));
         }
 
     };

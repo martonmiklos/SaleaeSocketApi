@@ -360,7 +360,7 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
     QString export_command = export_data_cmd;
     export_command += ", " + export_data_struct.FileName;
 
-    if( export_data_struct.ExportChannelSelection == DataExportChannelSelection::AllChannels )
+    if( export_data_struct.ExportChannelSelection == DataExportChannelSelection::ALL_CHANNELS )
         export_command += all_channels_option;
     else
     {
@@ -380,19 +380,19 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
     }
 
     if (
-            (export_data_struct.ExportChannelSelection == DataExportChannelSelection::AllChannels) ||
+            (export_data_struct.ExportChannelSelection == DataExportChannelSelection::ALL_CHANNELS) ||
             (export_data_struct.AnalogChannelsToExport.length() > 0)
             )
     {
-        if( export_data_struct.AnalogFormat == AnalogOutputFormat::Voltage )
+        if( export_data_struct.AnalogFormat == AnalogOutputFormat::VOLTAGE )
             export_command += voltage_option;
         else if( export_data_struct.AnalogFormat == AnalogOutputFormat::ADC )
             export_command += raw_adc_option;
     }
 
-    if( export_data_struct.SamplesRangeType == DataExportSampleRangeType::RangeAll )
+    if( export_data_struct.SamplesRangeType == DataExportSampleRangeType::ALL_TIME )
         export_command += all_time_option;
-    else if( export_data_struct.SamplesRangeType == DataExportSampleRangeType::RangeTimes )
+    else if( export_data_struct.SamplesRangeType == DataExportSampleRangeType::TIME_SPAN )
     {
         export_command += time_span_option;
         export_command += ", " + QString::number(export_data_struct.StartingTime);
@@ -400,17 +400,17 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
     }
 
     switch (export_data_struct.ExportType) {
-    case DataExportType::ExportCsv:
+    case DataExportType::CSV:
         export_command += csv_option;
 
-        if( export_data_struct.CsvIncludeHeaders == CsvHeadersType::CsvIncludesHeaders )
+        if( export_data_struct.CsvIncludeHeaders == CsvHeadersType::HEADERS )
             export_command += headers_option;
-        else if( export_data_struct.CsvIncludeHeaders == CsvHeadersType::CsvNoHeaders )
+        else if( export_data_struct.CsvIncludeHeaders == CsvHeadersType::NO_HEADERS )
             export_command += no_headers_option;
 
-        if( export_data_struct.CsvDelimiter == CsvDelimiterType::CsvTab )
+        if( export_data_struct.CsvDelimiter == CsvDelimiterType::TAB )
             export_command += tab_option;
-        else if( export_data_struct.CsvDelimiter == CsvDelimiterType::CsvComma )
+        else if( export_data_struct.CsvDelimiter == CsvDelimiterType::COMMA )
             export_command += comma_option;
 
         if( export_data_struct.CsvTimestamp == CsvTimestampType::CsvSample )
@@ -428,30 +428,30 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
         else if( export_data_struct.CsvDensityMode == CsvDensity::CsvComplete )
             export_command += row_per_sample_option;
 
-        if( export_data_struct.CsvDisplayBase == CsvBase::CsvDecimal )
+        if( export_data_struct.CsvDisplayBase == CsvBase::DEC )
             export_command += dec_option;
-        else if( export_data_struct.CsvDisplayBase == CsvBase::CsvHexadecimal )
+        else if( export_data_struct.CsvDisplayBase == CsvBase::HEX )
             export_command += hex_option;
-        else if( export_data_struct.CsvDisplayBase == CsvBase::CsvBinary )
+        else if( export_data_struct.CsvDisplayBase == CsvBase::BIN )
             export_command += bin_option;
-        else if( export_data_struct.CsvDisplayBase == CsvBase::CsvAscii )
+        else if( export_data_struct.CsvDisplayBase == CsvBase::ASCII )
             export_command += ascii_option;
         break;
-    case DataExportType::ExportBinary:
+    case DataExportType::BINARY:
         export_command += binary_option;
 
-        if( export_data_struct.BinaryOutput == BinaryOutputMode::BinaryEverySample )
+        if( export_data_struct.BinaryOutput == BinaryOutputMode::EACH_SAMPLE )
             export_command += each_sample_option;
-        else if( export_data_struct.BinaryOutput == BinaryOutputMode::BinaryEveryChange )
+        else if( export_data_struct.BinaryOutput == BinaryOutputMode::ON_CHANGE )
             export_command += on_change_option;
 
         export_command.append(", ");
         export_command.append(QMetaEnum::fromType<BinaryOutputWordSize>().valueToKey(export_data_struct.BinOutputWordSize));
         break;
-    case DataExportType::ExportVcd:
+    case DataExportType::VCD:
         export_command += vcd_option;
         break;
-    case DataExportType::ExportMatlab:
+    case DataExportType::MATLAB:
         export_command += matlab_option;
         break;
     }
@@ -471,37 +471,40 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
 bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels, bool capture_contains_analog_channels )
 {
     bool is_mixed_mode_capture = capture_contains_digital_channels && capture_contains_analog_channels; //different export options happen in this case.
-    if( is_mixed_mode_capture && export_settings.ExportChannelSelection == DataExportChannelSelection::AllChannels )
-        export_settings.DataExportMixedExportMode = DataExportMixedModeExportType::AnalogAndDigital; //this is not required to be explicitly set by the user.
+    if( is_mixed_mode_capture && export_settings.ExportChannelSelection == DataExportChannelSelection::ALL_CHANNELS )
+        export_settings.DataExportMixedExportMode = DataExportMixedModeExportType::ANALOG_AND_DIGITAL; //this is not required to be explicitly set by the user.
 
-    QList<QString> command_parts;
+    QStringList command_parts;
     command_parts.append( export_data2_cmd );
 
     command_parts.append( export_settings.FileName );
 
     command_parts.append( QMetaEnum::fromType<DataExportChannelSelection>().valueToKey(export_settings.ExportChannelSelection) );
 
-    if( export_settings.ExportChannelSelection == DataExportChannelSelection::SpecificChannels )
-    {
+    if (export_settings.ExportChannelSelection == DataExportChannelSelection::SPECIFIC_CHANNELS) {
         if( is_mixed_mode_capture )
             command_parts.append( QMetaEnum::fromType<DataExportChannelSelection>().valueToKey(export_settings.DataExportMixedExportMode) );
 
-        if (export_settings.DigitalChannelsToExport.count())  {
-            //FIXME
-            //command_parts.appendRange( export_settings.DigitalChannelsToExport.Select( x => new Channel { Index = x, DataType = Channel.ChannelDataType.DigitalChannel }.GetExportQString() ) );
+        foreach (int channel, export_settings.DigitalChannelsToExport) {
+            Channel ch;
+            ch.Index = channel;
+            ch.DataType = Channel::DIGITAL;
+            command_parts.append(ch.GetExportstring());
         }
 
-        if (export_settings.AnalogChannelsToExport.count()) {
-            // FIXME
-            //command_parts.appendRange( export_settings.AnalogChannelsToExport.Select( x => new Channel { Index = x, DataType = Channel.ChannelDataType.AnalogChannel }.GetExportQString() ) );
+
+        foreach (int channel, export_settings.AnalogChannelsToExport) {
+            Channel ch;
+            ch.Index = channel;
+            ch.DataType = Channel::ANALOG;
+            command_parts.append(ch.GetExportstring());
         }
     }
 
     //time options.
     command_parts.append(QMetaEnum::fromType<DataExportSampleRangeType>().valueToKey(export_settings.SamplesRangeType));
 
-    if( export_settings.SamplesRangeType == DataExportSampleRangeType::RangeTimes )
-    {
+    if (export_settings.SamplesRangeType == DataExportSampleRangeType::TIME_SPAN) {
         command_parts.append( QString::number(export_settings.StartingTime) );
         command_parts.append( QString::number(export_settings.EndingTime) );
     }
@@ -509,9 +512,8 @@ bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, 
 
     command_parts.append( QMetaEnum::fromType<DataExportType>().valueToKey(export_settings.ExportType) );
     //digital only CSV
-    if (
-            capture_contains_digital_channels && export_settings.ExportType == DataExportType::ExportCsv &&
-            (!is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::DigitalOnly)) {
+    if (capture_contains_digital_channels && export_settings.ExportType == DataExportType::CSV &&
+            (!is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::DIGITAL_ONLY)) {
         command_parts.append(QMetaEnum::fromType<CsvHeadersType>().valueToKey(export_settings.CsvIncludeHeaders));
         command_parts.append(QMetaEnum::fromType<CsvDelimiterType>().valueToKey(export_settings.CsvDelimiter));
         command_parts.append(QMetaEnum::fromType<CsvTimestampType>().valueToKey(export_settings.CsvTimestamp));
@@ -522,9 +524,8 @@ bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, 
     }
 
     //analog only CSV
-    if( capture_contains_analog_channels && export_settings.ExportType == DataExportType::ExportCsv &&
-            (!is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::AnalogOnly ) )
-    {
+    if( capture_contains_analog_channels && export_settings.ExportType == DataExportType::CSV &&
+            (!is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::ANALOG_ONLY ) ) {
         command_parts.append( QMetaEnum::fromType<CsvHeadersType>().valueToKey(export_settings.CsvIncludeHeaders) );
         command_parts.append( QMetaEnum::fromType<CsvDelimiterType>().valueToKey(export_settings.CsvDelimiter) );
         command_parts.append( QMetaEnum::fromType<CsvBase>().valueToKey(export_settings.CsvDisplayBase) );
@@ -533,8 +534,9 @@ bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, 
     }
 
     //mixed mode CSV
-    if( export_settings.ExportType == DataExportType::ExportCsv && is_mixed_mode_capture && export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::AnalogAndDigital )
-    {
+    if (export_settings.ExportType == DataExportType::CSV &&
+            is_mixed_mode_capture &&
+            export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::ANALOG_AND_DIGITAL ) {
         command_parts.append( QMetaEnum::fromType<CsvHeadersType>().valueToKey(export_settings.CsvIncludeHeaders) );
         command_parts.append( QMetaEnum::fromType<CsvDelimiterType>().valueToKey(export_settings.CsvDelimiter) );
         command_parts.append( QMetaEnum::fromType<CsvBase>().valueToKey(export_settings.CsvDisplayBase) );
@@ -542,35 +544,34 @@ bool SaleaeClient::SaleaeClient::ExportData2( ExportDataStruct export_settings, 
     }
 
     //digital binary
-    if( capture_contains_digital_channels &&  export_settings.ExportType == DataExportType::ExportBinary && ( !is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::DigitalOnly ) )
-    {
+    if (capture_contains_digital_channels &&  export_settings.ExportType == DataExportType::BINARY &&
+            ( !is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::DIGITAL_ONLY ) ) {
         command_parts.append( QMetaEnum::fromType<BinaryOutputMode>().valueToKey(export_settings.BinaryOutput) );
         command_parts.append( QMetaEnum::fromType<BinaryBitShifting>().valueToKey(export_settings.BinaryBitShiftingMode) );
-        command_parts.append( QMetaEnum::fromType<BinaryOutputWordSize>().valueToKey(export_settings.BinOutputWordSize) );
+        command_parts.append( QString::number(export_settings.BinOutputWordSize) );
     }
 
     //analog only binary
-    if( capture_contains_analog_channels && export_settings.ExportType == DataExportType::ExportBinary && ( !is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::AnalogOnly ) )
-    {
+    if (capture_contains_analog_channels &&
+            export_settings.ExportType == DataExportType::BINARY &&
+            ( is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::ANALOG_ONLY ) ) {
         command_parts.append( QMetaEnum::fromType<AnalogOutputFormat>().valueToKey(export_settings.AnalogFormat) );
     }
 
     //VCD (always digital only)
-    if( export_settings.ExportType == DataExportType::ExportVcd )
-    {
+    //if( export_settings.ExportType == DataExportType::VCD ) {
         //no settings
-    }
+    //}
 
     //Matlab digital:
-    if( capture_contains_digital_channels && export_settings.ExportType == DataExportType::ExportMatlab && ( !is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::DigitalOnly ) )
-    {
-
+    //if( capture_contains_digital_channels && export_settings.ExportType == DataExportType::MATLAB && ( !is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::DIGITAL_ONLY ) ){
         //no settings
-    }
+    //}
 
     //Matlab analog or mixed:
-    if( capture_contains_analog_channels && export_settings.ExportType == DataExportType::ExportMatlab && ( !is_mixed_mode_capture || export_settings.DataExportMixedExportMode != DataExportMixedModeExportType::DigitalOnly ) )
-    {
+    if( capture_contains_analog_channels &&
+            export_settings.ExportType == DataExportType::MATLAB &&
+            (!is_mixed_mode_capture || export_settings.DataExportMixedExportMode != DataExportMixedModeExportType::DIGITAL_ONLY ) ) {
         command_parts.append( QMetaEnum::fromType<AnalogOutputFormat>().valueToKey(export_settings.AnalogFormat) );
     }
 
