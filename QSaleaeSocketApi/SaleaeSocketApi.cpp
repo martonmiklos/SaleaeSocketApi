@@ -472,14 +472,14 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
 /// <returns></returns>
 ///
 /// TODO: make bool arguments enums!!!
-bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels, bool capture_contains_analog_channels )
+bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool export_digital_channels, bool export_analog_channels )
 {
-    bool is_mixed_mode_capture = capture_contains_digital_channels && capture_contains_analog_channels; //different export options happen in this case.
+    bool is_mixed_mode_capture = export_digital_channels && export_analog_channels; //different export options happen in this case.
 
-    if (capture_contains_analog_channels && !capture_contains_digital_channels)
+    if (export_analog_channels && !export_digital_channels)
         export_settings.DataExportMixedExportMode = ANALOG_ONLY;
 
-    if (capture_contains_digital_channels && !capture_contains_analog_channels)
+    if (export_digital_channels && !export_analog_channels)
         export_settings.DataExportMixedExportMode = DIGITAL_ONLY;
 
     if( is_mixed_mode_capture && export_settings.ExportChannelSelection == DataExportChannelSelection::ALL_CHANNELS)
@@ -491,9 +491,10 @@ bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_c
     command_parts.append( export_settings.FileName );
 
     command_parts.append( QMetaEnum::fromType<DataExportChannelSelection>().valueToKey(export_settings.ExportChannelSelection) );
-    command_parts.append( QMetaEnum::fromType<DataExportMixedModeExportType>().valueToKey(export_settings.DataExportMixedExportMode) );
 
     if (export_settings.ExportChannelSelection == DataExportChannelSelection::SPECIFIC_CHANNELS) {
+        command_parts.append( QMetaEnum::fromType<DataExportMixedModeExportType>().valueToKey(export_settings.DataExportMixedExportMode) );
+
         foreach (int channel, export_settings.DigitalChannelsToExport) {
             Channel ch;
             ch.Index = channel;
@@ -519,7 +520,7 @@ bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_c
 
     command_parts.append( QMetaEnum::fromType<DataExportType>().valueToKey(export_settings.ExportType) );
     //digital only CSV
-    if (capture_contains_digital_channels && export_settings.ExportType == DataExportType::CSV &&
+    if (export_digital_channels && export_settings.ExportType == DataExportType::CSV &&
             (!is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::DIGITAL_ONLY)) {
         command_parts.append(QMetaEnum::fromType<CsvHeadersType>().valueToKey(export_settings.CsvIncludeHeaders));
         command_parts.append(QMetaEnum::fromType<CsvDelimiterType>().valueToKey(export_settings.CsvDelimiter));
@@ -531,7 +532,7 @@ bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_c
     }
 
     //analog only CSV
-    if( capture_contains_analog_channels && export_settings.ExportType == DataExportType::CSV &&
+    if( export_analog_channels && export_settings.ExportType == DataExportType::CSV &&
             (!is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::ANALOG_ONLY ) ) {
         command_parts.append( QMetaEnum::fromType<CsvHeadersType>().valueToKey(export_settings.CsvIncludeHeaders) );
         command_parts.append( QMetaEnum::fromType<CsvDelimiterType>().valueToKey(export_settings.CsvDelimiter) );
@@ -551,7 +552,7 @@ bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_c
     }
 
     //digital binary
-    if (capture_contains_digital_channels &&  export_settings.ExportType == DataExportType::BINARY &&
+    if (export_digital_channels &&  export_settings.ExportType == DataExportType::BINARY &&
             ( !is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::DIGITAL_ONLY ) ) {
         command_parts.append( QMetaEnum::fromType<BinaryOutputMode>().valueToKey(export_settings.BinaryOutput) );
         command_parts.append( QMetaEnum::fromType<BinaryBitShifting>().valueToKey(export_settings.BinaryBitShiftingMode) );
@@ -559,7 +560,7 @@ bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_c
     }
 
     //analog only binary
-    if (capture_contains_analog_channels &&
+    if (export_analog_channels &&
             export_settings.ExportType == DataExportType::BINARY &&
             ( is_mixed_mode_capture || export_settings.DataExportMixedExportMode == DataExportMixedModeExportType::ANALOG_ONLY ) ) {
         command_parts.append( QMetaEnum::fromType<AnalogOutputFormat>().valueToKey(export_settings.AnalogFormat) );
@@ -576,7 +577,7 @@ bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_c
     //}
 
     //Matlab analog or mixed:
-    if( capture_contains_analog_channels &&
+    if( export_analog_channels &&
             export_settings.ExportType == DataExportType::MATLAB &&
             (!is_mixed_mode_capture || export_settings.DataExportMixedExportMode != DataExportMixedModeExportType::DIGITAL_ONLY ) ) {
         command_parts.append( QMetaEnum::fromType<AnalogOutputFormat>().valueToKey(export_settings.AnalogFormat) );
