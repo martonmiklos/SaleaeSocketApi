@@ -318,7 +318,7 @@ bool SaleaeClient::LoadFromFile( QString file )
     export_command += file;
     Writestring( export_command );
 
-    return GetResponse();
+    return GetResponse(3000);
 }
 
 //create input struct
@@ -588,7 +588,7 @@ bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool export_di
     Writestring( socket_command );
 
 
-    return GetResponse();
+    return GetResponse(5000);
 }
 
 /// <summary>
