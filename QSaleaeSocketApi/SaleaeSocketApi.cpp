@@ -475,7 +475,14 @@ bool SaleaeClient::ExportData( ExportDataStruct export_data_struct )
 bool SaleaeClient::ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels, bool capture_contains_analog_channels )
 {
     bool is_mixed_mode_capture = capture_contains_digital_channels && capture_contains_analog_channels; //different export options happen in this case.
-    if( is_mixed_mode_capture && export_settings.ExportChannelSelection == DataExportChannelSelection::ALL_CHANNELS )
+
+    if (capture_contains_analog_channels && !capture_contains_digital_channels)
+        export_settings.DataExportMixedExportMode = ANALOG_ONLY;
+
+    if (capture_contains_digital_channels && !capture_contains_analog_channels)
+        export_settings.DataExportMixedExportMode = DIGITAL_ONLY;
+
+    if( is_mixed_mode_capture && export_settings.ExportChannelSelection == DataExportChannelSelection::ALL_CHANNELS)
         export_settings.DataExportMixedExportMode = DataExportMixedModeExportType::ANALOG_AND_DIGITAL; //this is not required to be explicitly set by the user.
 
     QStringList command_parts;
