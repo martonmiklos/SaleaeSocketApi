@@ -60,16 +60,24 @@ bool SaleaeClient::GetResponse(int timeoutInMsec)
     while (timer.elapsed() < timeoutInMsec) {
         m_socket->waitForReadyRead(1);
         if (m_socket->bytesAvailable()) {
-            response.append(m_socket->readAll());
-            qWarning() << response;
+            response.append(m_socket->readAll());         
         }
 
         if (response.startsWith("ACK")) {
+            qWarning() << response;
+            qWarning() << QString("Response time: %1 ms").arg(timer.elapsed());
             return true;
         } else if (response.startsWith("NAK")) {
+            qWarning() << response;
+            qWarning() << QString("Response time:: %1 ms").arg(timer.elapsed());
             return false;
         }
     }
+
+    if(!response.isEmpty())
+        qWarning() << response;
+
+    qWarning() << QString("Error: Response timeout (%1 ms)!").arg(timeoutInMsec);
     return false;
 }
 
