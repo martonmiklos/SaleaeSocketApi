@@ -45,6 +45,7 @@ void SaleaeClient::disconnectFromLogic()
 
 void SaleaeClient::Writestring(const QString &str )
 {
+    m_socket->readAll();
     m_socket->write(str.toLocal8Bit());
     m_socket->putChar('\0');
     m_socket->flush();
@@ -84,8 +85,14 @@ bool SaleaeClient::GetResponse(int timeoutInMsec)
 QString SaleaeClient::GetResponseString(int timeoutInMsec)
 {
     QString response;
-    m_socket->waitForReadyRead(timeoutInMsec);
-    response.append(m_socket->readAll());
+    QElapsedTimer timer;
+    timer.start();
+
+    while (timer.elapsed() < timeoutInMsec) {
+        m_socket->waitForReadyRead(1);
+        response.append(m_socket->readAll());
+    }
+    qWarning() << response;
     return response;
 }
 
