@@ -13,3 +13,5 @@ SOURCES += $$PWD/SaleaeSocketApi.cpp
 HEADERS += $$PWD/saleaesocketapi_global.h \
            $$PWD/SaleaeSocketApiTypes.h \
            $$PWD/SaleaeSocketApi.h
+
+INCLUDEPATH += $$PWD

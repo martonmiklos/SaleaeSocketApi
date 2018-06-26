@@ -11,7 +11,8 @@ namespace SaleaeSocketApi
 SaleaeClient::SaleaeClient( QString host_str, int port_input, QObject *parent) :
     QObject(parent),
     m_port(port_input),
-    m_host(host_str)
+    m_host(host_str),
+    m_logicConnected(false)
 {
     m_socket = new QTcpSocket(this);
 }
