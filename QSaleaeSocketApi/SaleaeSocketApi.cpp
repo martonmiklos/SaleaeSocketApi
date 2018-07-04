@@ -739,7 +739,7 @@ QList<SaleaeClient::ConnectedDevice> SaleaeClient::GetConnectedDevices()
         ConnectedDevice device = {
             device_type, // DeviceType
             elements[ 1 ], // Name
-            (quint64)elements[ 3 ].toLongLong(NULL, 16), // DeviceId
+            (quint64)elements[ 3 ].toLongLong(nullptr, 16), // DeviceId
             elements[ 0 ].toInt(), // Index
             (elements.count() == 5 && elements[4] == "ACTIVE") ? true : false // IsActive
         };
