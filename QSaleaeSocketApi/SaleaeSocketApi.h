@@ -4,10 +4,13 @@
 #include "SaleaeSocketApiTypes.h"
 
 #include <QList>
+#include <QLoggingCategory>
 #include <QMetaEnum>
 #include <QObject>
 #include <QString>
 #include <QTcpSocket>
+
+Q_DECLARE_LOGGING_CATEGORY(saleaeSocketAPI)
 
 namespace SaleaeSocketApi
 {
@@ -60,13 +63,14 @@ public:
 
     enum DeviceType
     {
-        Logic,
-        Logic16,
-        Logic4,
-        Logic8,
-        LogicPro8,
-        LogicPro16
+        LOGIC_DEVICE,
+        LOGIC_16_DEVICE,
+        LOGIC_4_DEVICE,
+        LOGIC_8_DEVICE,
+        LOGIC_PRO_8_DEVICE,
+        LOGIC_PRO_16_DEVICE
     };
+    Q_ENUM(DeviceType)
 
     enum Trigger {
         None,
@@ -86,6 +90,7 @@ public:
         FortyPercent = 40,
         TwentyPercent = 20
     };
+    Q_ENUM(PerformanceOption)
 
     //Export Data
     enum DataExportChannelSelection
