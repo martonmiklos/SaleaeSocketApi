@@ -149,10 +149,12 @@ bool SaleaeClient::SetTrigger(QList<Trigger> triggers, double minimum_pulse_widt
 
     command.append (set_trigger_cmd);
 
-    /*if(triggers.Count(x => x == Trigger.PositivePulse || x == Trigger.NegativePulse || x == Trigger.RisingEdge || x == Trigger.FallingEdge) > 1)
-        throw new SaleaeSocketApiException("invalid trigger specifications");
-        FIXME
-        */
+    if (triggers.count(POSPULSE) > 1 ||
+        triggers.count(NEGPULSE) > 1 ||
+        triggers.count(POSEDGE) > 1 ||
+        triggers.count(NEGEDGE) > 1) {
+        throw new SaleaeSocketApiException(tr("Invalid trigger configuration: some config was specified more than once"));
+    }
 
     foreach (Trigger channel, triggers) {
         if (channel != None) {
