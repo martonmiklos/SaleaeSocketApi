@@ -620,13 +620,10 @@ QList<Analyzer> SaleaeClient::GetAnalyzers()
     }
 
     QList<Analyzer> analyzers;
-
-    foreach(QString line, lines)
-    {
-        //var elements = line.split(',').Select(x => x.Trim()).ToList();
+    foreach(QString line, lines) {
         QStringList elements = line.split(',');
         Analyzer analyzer;
-        analyzer.AnalyzerType = elements.at(0).toInt();
+        analyzer.AnalyzerType = elements.at(0);
         analyzer.Index = elements.at(0).toInt();
         analyzers.append(analyzer);
     }
@@ -644,7 +641,7 @@ bool SaleaeClient::ExportAnalyzers(int selected, QString filename, bool mXmitFil
 {
     QString export_command = export_analyzer_cmd + ", ";
     export_command += QString::number(selected) + ", " + filename;
-    if(mXmitFile == true)
+    if (mXmitFile == true)
         export_command += ", mXmitFile";
     Writestring(export_command);
 
