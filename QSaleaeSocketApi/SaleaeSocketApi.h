@@ -232,8 +232,9 @@ public:
         bool IsSelected;
     };
 
-    struct ExportDataStruct
+    class ExportDataStruct
     {
+    public:
         /// <summary>
         /// The fully qualified path to the target file. Folder must exist. Path must be absolute. Always required
         /// features like ~/ and %appdata% are not supported. You can exand those first before passing the path.
@@ -244,12 +245,12 @@ public:
         /// This option is only required & applied IF your capture contains digital and analog channels, AND you select "Specific Channels" for the channel selection option.
         /// i. e. If you then select digital only, you will get the native, digital only interface for an export mode.
         /// </summary>
-        DataExportMixedModeExportType DataExportMixedExportMode;
+        DataExportMixedModeExportType DataExportMixedExportMode = ANALOG_AND_DIGITAL;
 
         /// <summary>
         /// This option allows you to export all channels in the capture, or only specific channels. Alaways required
         /// </summary>
-        DataExportChannelSelection ExportChannelSelection;
+        DataExportChannelSelection ExportChannelSelection = ALL_CHANNELS;
         /// <summary>
         /// List channel indexes of digital channels to export. Only required if you select "SpecificChannels"
         /// </summary>
@@ -263,7 +264,7 @@ public:
         /// Export all time, or just export a specific range of time. Always required
         /// Command will NAK if a custom time range extends past captured data.
         /// </summary>
-        DataExportSampleRangeType SamplesRangeType; //{ RangeAll, RangeTimes }
+        DataExportSampleRangeType SamplesRangeType = ALL_TIME;
         /// <summary>
         /// Start time of export. Only appies if "RangeTimes" is set.
         /// Relative to trigger sample, can be negative.
@@ -278,58 +279,58 @@ public:
         /// <summary>
         /// Primary export type. Always required
         /// </summary>
-        DataExportType ExportType; //{ ExportBinary, ExportCsv, ExportVcd }
+        DataExportType ExportType = CSV;
 
 
         /// <summary>
         /// Required for all CSV exports.
         /// </summary>
-        CsvHeadersType CsvIncludeHeaders; //{ CsvIncludesHeaders, CsvNoHeaders }
+        CsvHeadersType CsvIncludeHeaders = HEADERS;
         /// <summary>
         /// Required for all CSV exports
         /// </summary>
-        CsvDelimiterType CsvDelimiter;//{ CsvComma, CsvTab }
+        CsvDelimiterType CsvDelimiter = COMMA;
         /// <summary>
         /// Required only when exporting digital only CSV.
         /// Does not apply when exporting analog and digital or analog only.
         /// </summary>
-        CsvOutputMode CsvOutput;//{ CsvSingleNumber, CsvOneColumnPerBit }
+        CsvOutputMode CsvOutput = COMBINED;
         /// <summary>
         /// Only applies when exporting digital only CSV
         /// Does not apply when exporting analog and digital or analog only. (time values used)
         /// </summary>
-        CsvTimestampType CsvTimestamp;//{ CsvTime, CsvSample }
+        CsvTimestampType CsvTimestamp = SAMPLE_NUMBER;
         /// <summary>
         /// Required when exporting analog samples as raw ADC value.
         /// Also Required when exporting digital only data in "CsvSingleNumber" format
         /// </summary>
-        CsvBase CsvDisplayBase;//{ CsvBinary, CsvDecimal, CsvHexadecimal, CsvAscii }
+        CsvBase CsvDisplayBase = DEC;
         /// <summary>
         /// Only required when exporting digital only CSV data.
         /// CsvTransition produces a smaller file where only transition timestamps are exported
         /// CsvComplete includes every single sample
         /// </summary>
-        CsvDensity CsvDensityMode;//{ CsvTransition, CsvComplete }
+        CsvDensity CsvDensityMode = ROW_PER_CHANGE;
 
 
         //Type: Binary
         /// <summary>
         /// Only required for digital only Binary mode
         /// </summary>
-        BinaryOutputMode BinaryOutput;//{ BinaryEverySample, BinaryEveryChange }
+        BinaryOutputMode BinaryOutput = ON_CHANGE;
         /// <summary>
         /// Only required for digital only Binary mode
         /// </summary>
-        BinaryBitShifting BinaryBitShiftingMode;//{ BinaryOriginalBitPositions, BinaryShiftRight }
+        BinaryBitShifting BinaryBitShiftingMode = NO_SHIFT;
         /// <summary>
         /// Only required for digital only Binary mode
         /// </summary>
-        BinaryOutputWordSize BinOutputWordSize;//{ Binary8Bit, Binary16Bit, Binary32Bit, Binary64Bit }
+        BinaryOutputWordSize BinOutputWordSize = Binary8Bit;
 
         /// <summary>
         /// ADC values or floating point voltages. Required for all export types that include analog channels
         /// </summary>
-        AnalogOutputFormat AnalogFormat; //This feature needs v1.1.32+
+        AnalogOutputFormat AnalogFormat = VOLTAGE; //This feature needs v1.1.32+
     };
 
     QString CustomCommand( QString export_command );
@@ -354,7 +355,7 @@ public:
     bool ExportData2( ExportDataStruct export_settings, bool capture_contains_digital_channels = true, bool capture_contains_analog_channels = true);
 
     QList<Analyzer> GetAnalyzers();
-    bool ExportAnalyzers( int selected, QString filename, bool mXmitFile );
+    bool ExportAnalyzers( int selected, QString filename, bool mXmitFile = false);
 
     bool Capture();
     bool StopCapture();
