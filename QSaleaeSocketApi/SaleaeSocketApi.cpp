@@ -19,7 +19,7 @@ SaleaeClient::SaleaeClient(QString host_str, int port_input, QObject *parent) :
     m_socket = new QTcpSocket(this);
 }
 
-bool SaleaeClient::connectToLogic(QString host_str, int port_input)
+bool SaleaeClient::connectToLogic(QString host_str, quint16 port_input)
 {
     m_port = port_input;
     m_host = host_str;
@@ -48,11 +48,13 @@ void SaleaeClient::disconnectFromLogic()
 
 void SaleaeClient::Writestring(const QString &str)
 {
-    m_socket->readAll();
-    m_socket->write(str.toLocal8Bit());
-    m_socket->putChar('\0');
-    m_socket->flush();
-    qCDebug(saleaeSocketAPI) << "Wrote data: " << str;
+    if (isLogicConnected()) {
+        m_socket->readAll();
+        m_socket->write(str.toLocal8Bit());
+        m_socket->putChar('\0');
+        m_socket->flush();
+        qCDebug(saleaeSocketAPI) << "Wrote data: " << str;
+    }
 }
 
 bool SaleaeClient::GetResponse(int timeoutInMsec)
@@ -731,7 +733,7 @@ QList<SaleaeClient::ConnectedDevice> SaleaeClient::GetConnectedDevices()
         ConnectedDevice device = {
             device_type, // DeviceType
             elements[1], // Name
-            (quint64)elements[3].toLongLong(nullptr, 16), // DeviceId
+            static_cast<quint64>(elements[3].toLongLong(nullptr, 16)), // DeviceId
             elements[0].toInt(), // Index
             (elements.count() == 5 && elements[4] == "ACTIVE") ? true : false // IsActive
         };
@@ -775,7 +777,7 @@ SaleaeClient::PerformanceOption SaleaeClient::GetPerformanceOption()
 
     QString response = GetResponseString();
 
-    PerformanceOption selected_option = (PerformanceOption)response.split('\n').first().toInt();
+    PerformanceOption selected_option = static_cast<PerformanceOption>(response.split('\n').first().toInt());
     return selected_option;
 }
 

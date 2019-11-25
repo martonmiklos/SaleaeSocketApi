@@ -20,7 +20,7 @@ class SaleaeClient : public QObject
 public:
     SaleaeClient(QString host_str = "127.0.0.1", int port_input = 10429 , QObject *parent = nullptr);
     // connect and disconnect function names are reserved
-    bool connectToLogic(QString host_str = "127.0.0.1", int port_input = 10429);
+    bool connectToLogic(QString host_str = "127.0.0.1", quint16 port_input = 10429);
     void disconnectFromLogic();
 
     //Command strings
