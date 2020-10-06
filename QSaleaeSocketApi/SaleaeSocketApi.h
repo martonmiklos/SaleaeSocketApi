@@ -24,42 +24,42 @@ public:
     void disconnectFromLogic();
 
     //Command strings
-    const QString set_trigger_cmd = "SET_TRIGGER";
-    const QString set_num_samples_cmd = "SET_NUM_SAMPLES";
-    const QString get_sample_rate_cmd = "GET_SAMPLE_RATE";
-    const QString set_sample_rate_cmd = "SET_SAMPLE_RATE";
+    static QString set_trigger_cmd ;
+    static QString set_num_samples_cmd ;
+    static QString get_sample_rate_cmd ;
+    static QString set_sample_rate_cmd ;
 
-    const QString set_capture_seconds_cmd = "SET_CAPTURE_SECONDS";
-    const QString capture_to_file_cmd = "CAPTURE_TO_FILE";
-    const QString save_to_file_cmd = "SAVE_TO_FILE";
-    const QString load_from_file_cmd = "LOAD_FROM_FILE";
-    const QString export_data_cmd = "EXPORT_DATA";
-    const QString export_data2_cmd = "EXPORT_DATA2";
+    static QString set_capture_seconds_cmd ;
+    static QString capture_to_file_cmd ;
+    static QString save_to_file_cmd ;
+    static QString load_from_file_cmd ;
+    static QString export_data_cmd ;
+    static QString export_data2_cmd ;
 
-    const QString get_all_sample_rates_cmd = "GET_ALL_SAMPLE_RATES";
-    const QString get_analyzers_cmd = "GET_ANALYZERS";
-    const QString export_analyzer_cmd = "EXPORT_ANALYZER";
-    const QString get_inputs_cmd = "GET_INPUTS";
-    const QString capture_cmd = "CAPTURE";
-    const QString stop_capture_cmd = "STOP_CAPTURE";
-    const QString get_capture_pretrigger_buffer_size_cmd = "GET_CAPTURE_PRETRIGGER_BUFFER_SIZE";
-    const QString set_capture_pretrigger_buffer_size_cmd = "SET_CAPTURE_PRETRIGGER_BUFFER_SIZE";
-    const QString get_connected_devices_cmd = "GET_CONNECTED_DEVICES";
-    const QString select_active_device_cmd = "SELECT_ACTIVE_DEVICE";
+    static QString get_all_sample_rates_cmd ;
+    static QString get_analyzers_cmd ;
+    static QString export_analyzer_cmd ;
+    static QString get_inputs_cmd ;
+    static QString capture_cmd ;
+    static QString stop_capture_cmd ;
+    static QString get_capture_pretrigger_buffer_size_cmd ;
+    static QString set_capture_pretrigger_buffer_size_cmd ;
+    static QString get_connected_devices_cmd ;
+    static QString select_active_device_cmd ;
 
-    const QString get_active_channels_cmd = "GET_ACTIVE_CHANNELS";
-    const QString set_active_channels_cmd = "SET_ACTIVE_CHANNELS";
-    const QString reset_active_channels_cmd = "RESET_ACTIVE_CHANNELS";
+    static QString get_active_channels_cmd ;
+    static QString set_active_channels_cmd ;
+    static QString reset_active_channels_cmd ;
 
-    const QString set_performance_cmd = "SET_PERFORMANCE";
-    const QString get_performance_cmd = "GET_PERFORMANCE";
-    const QString is_processing_complete_cmd = "IS_PROCESSING_COMPLETE";
-    const QString is_analyzer_complete_cmd = "IS_ANALYZER_COMPLETE";
+    static QString set_performance_cmd ;
+    static QString get_performance_cmd ;
+    static QString is_processing_complete_cmd ;
+    static QString is_analyzer_complete_cmd ;
 
-    const QString set_digital_voltage_option_cmd = "SET_DIGITAL_VOLTAGE_OPTION";
-    const QString get_digital_voltage_options_cmd = "GET_DIGITAL_VOLTAGE_OPTIONS";
+    static QString set_digital_voltage_option_cmd ;
+    static QString get_digital_voltage_options_cmd ;
 
-    const QString close_all_tabs_cmd = "CLOSE_ALL_TABS";
+    static QString close_all_tabs_cmd ;
 
     enum DeviceType
     {
@@ -357,7 +357,7 @@ public:
     QList<Analyzer> GetAnalyzers();
     bool ExportAnalyzers( int selected, QString filename, bool mXmitFile = false);
 
-    bool Capture();
+    bool Capture(int timeoutIn_ms = 0);
     bool StopCapture();
 
     int GetCapturePretriggerBufferSize();

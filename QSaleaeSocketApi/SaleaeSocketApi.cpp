@@ -10,6 +10,44 @@ Q_LOGGING_CATEGORY(saleaeSocketAPI, "SaleaeSocketApi")
 
 namespace SaleaeSocketApi
 {
+
+QString SaleaeClient::set_trigger_cmd = QStringLiteral("SET_TRIGGER");
+QString SaleaeClient::set_num_samples_cmd = QStringLiteral("SET_NUM_SAMPLES");
+QString SaleaeClient::get_sample_rate_cmd = QStringLiteral("GET_SAMPLE_RATE");
+QString SaleaeClient::set_sample_rate_cmd = QStringLiteral("SET_SAMPLE_RATE");
+
+QString SaleaeClient::set_capture_seconds_cmd = QStringLiteral("SET_CAPTURE_SECONDS");
+QString SaleaeClient::capture_to_file_cmd = QStringLiteral("CAPTURE_TO_FILE");
+QString SaleaeClient::save_to_file_cmd = QStringLiteral("SAVE_TO_FILE");
+QString SaleaeClient::load_from_file_cmd = QStringLiteral("LOAD_FROM_FILE");
+QString SaleaeClient::export_data_cmd = QStringLiteral("EXPORT_DATA");
+QString SaleaeClient::export_data2_cmd = QStringLiteral("EXPORT_DATA2");
+
+QString SaleaeClient::get_all_sample_rates_cmd = QStringLiteral("GET_ALL_SAMPLE_RATES");
+QString SaleaeClient::get_analyzers_cmd = QStringLiteral("GET_ANALYZERS");
+QString SaleaeClient::export_analyzer_cmd = QStringLiteral("EXPORT_ANALYZER");
+QString SaleaeClient::get_inputs_cmd = QStringLiteral("GET_INPUTS");
+QString SaleaeClient::capture_cmd = QStringLiteral("CAPTURE");
+QString SaleaeClient::stop_capture_cmd = QStringLiteral("STOP_CAPTURE");
+QString SaleaeClient::get_capture_pretrigger_buffer_size_cmd = QStringLiteral("GET_CAPTURE_PRETRIGGER_BUFFER_SIZE");
+QString SaleaeClient::set_capture_pretrigger_buffer_size_cmd = QStringLiteral("SET_CAPTURE_PRETRIGGER_BUFFER_SIZE");
+QString SaleaeClient::get_connected_devices_cmd = QStringLiteral("GET_CONNECTED_DEVICES");
+QString SaleaeClient::select_active_device_cmd = QStringLiteral("SELECT_ACTIVE_DEVICE");
+
+QString SaleaeClient::get_active_channels_cmd = QStringLiteral("GET_ACTIVE_CHANNELS");
+QString SaleaeClient::set_active_channels_cmd = QStringLiteral("SET_ACTIVE_CHANNELS");
+QString SaleaeClient::reset_active_channels_cmd = QStringLiteral("RESET_ACTIVE_CHANNELS");
+
+QString SaleaeClient::set_performance_cmd = QStringLiteral("SET_PERFORMANCE");
+QString SaleaeClient::get_performance_cmd = QStringLiteral("GET_PERFORMANCE");
+QString SaleaeClient::is_processing_complete_cmd = QStringLiteral("IS_PROCESSING_COMPLETE");
+QString SaleaeClient::is_analyzer_complete_cmd = QStringLiteral("IS_ANALYZER_COMPLETE");
+
+QString SaleaeClient::set_digital_voltage_option_cmd = QStringLiteral("SET_DIGITAL_VOLTAGE_OPTION");
+QString SaleaeClient::get_digital_voltage_options_cmd = QStringLiteral("GET_DIGITAL_VOLTAGE_OPTIONS");
+
+QString SaleaeClient::close_all_tabs_cmd = QStringLiteral("CLOSE_ALL_TABS");
+
 SaleaeClient::SaleaeClient(QString host_str, int port_input, QObject *parent) :
     QObject(parent),
     m_port(port_input),
@@ -653,10 +691,12 @@ bool SaleaeClient::ExportAnalyzers(int selected, QString filename, bool mXmitFil
 /// <summary>
 /// Start device capture
 /// </summary>
-bool SaleaeClient::Capture()
+bool SaleaeClient::Capture(int timeoutIn_ms)
 {
     Writestring(capture_cmd);
-    return GetResponse(100);
+    if (timeoutIn_ms == 0)
+        return true;
+    return GetResponse(timeoutIn_ms);
 }
 
 /// <summary>
