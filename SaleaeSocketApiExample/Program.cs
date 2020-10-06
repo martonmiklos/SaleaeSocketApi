@@ -90,9 +90,14 @@ namespace Saleae.SocketApi
 				Console.WriteLine( "" );
 				Console.WriteLine( "Press Enter to Continue" );
 				Console.ReadLine();
-
-				//display the currently selected sample rate and performance option.
-				var current_sample_rate = Client.GetSampleRate();
+                //showing active channels
+                List<int> active_digital_channels = new List<int>();
+                List<int> active_analog_channels = new List<int>();
+                Client.GetActiveChannels(active_digital_channels, active_analog_channels);
+                Console.WriteLine("Active Digital Channels: " + String.Join(", ", active_digital_channels.ToArray()));
+                Console.WriteLine("Active Analog Channels: " + String.Join(", ", active_analog_channels.ToArray()));
+                //display the currently selected sample rate and performance option.
+                var current_sample_rate = Client.GetSampleRate();
 				Console.WriteLine( "The previously selected sample rate was: " + current_sample_rate.DigitalSampleRate.ToString() + " SPS (digital), " + current_sample_rate.AnalogSampleRate.ToString() + " SPS (analog)" );
 				if( current_sample_rate.AnalogSampleRate > 0 && current_sample_rate.DigitalSampleRate > 0 )
 				{
@@ -143,16 +148,17 @@ namespace Saleae.SocketApi
 			//start a capture.
 			Console.WriteLine( "starting capture" );
 			Client.Capture();
-			Console.WriteLine( "" );
-			Console.WriteLine( "Press Enter to Exit" );
+			Console.WriteLine( "capture complete" );
+            //the following 3 functions require software 1.2.18 or newer. 
+            var range = Client.GetCaptureRange(); //1.2.18+
+            var view_state = Client.GetViewState(); //1.2.18+
+            Console.WriteLine("Press Enter to Continue");
+            Console.ReadLine();
+            Console.WriteLine("Setting ViewState");
+            Client.SetViewState(500.0, range.TriggerSample); //1.2.18+
+
+            Console.WriteLine( "Press Enter to Exit" );
 			Console.ReadLine();
-
-
-
-
-
 		}
-
-	
 	}
 }
