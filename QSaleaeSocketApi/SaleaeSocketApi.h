@@ -219,8 +219,7 @@ public:
         QString GetExportstring()
         {
             return  QString("%1 %2")
-                    .arg(QString::number(Index))
-                    .arg(DataType == ANALOG ? "ANALOG" : "DIGITAL");
+                    .arg(QString::number(Index), DataType == ANALOG ? "ANALOG" : "DIGITAL");
         }
 
     };
